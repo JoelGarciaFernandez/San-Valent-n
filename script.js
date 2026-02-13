@@ -5,74 +5,84 @@ const successScreen = document.getElementById('success-screen');
 const canvas = document.getElementById('confetti-canvas');
 const ctx = canvas.getContext('2d');
 
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
 let particles = [];
 const emojis = ["❤️", "🌹", "✨", "🥰", "💖", "🌸"];
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas(); // Inicializar
+// --- LÓGICA DEL BOTÓN "REBOTÓN" ---
 
-// --- LÓGICA DEL BOTÓN FUGITIVO (OPTIMIZADA) ---
 function moveButton() {
-    // 1. Obtener dimensiones seguras de pantalla (restando un margen de seguridad)
-    const margin = 20; // 20px de margen para que no se pegue al borde
-    const screenWidth = window.innerWidth - margin;
-    const screenHeight = window.innerHeight - margin;
-    
-    const btnWidth = noBtn.offsetWidth;
-    const btnHeight = noBtn.offsetHeight;
+    // 1. ¿Dónde está el botón AHORA?
+    const currentRect = noBtn.getBoundingClientRect();
+    const currentX = currentRect.left;
+    const currentY = currentRect.top;
 
-    // 2. Calcular posición asegurando que no se salga
-    // Math.max(0, ...) asegura que no sea negativo
-    const maxX = screenWidth - btnWidth;
-    const maxY = screenHeight - btnHeight;
-    
-    const randomX = Math.max(margin, Math.random() * maxX);
-    const randomY = Math.max(margin, Math.random() * maxY);
+    // 2. Límites de la pantalla (con un margen de seguridad de 20px)
+    const margin = 20;
+    const maxWidth = window.innerWidth - currentRect.width - margin;
+    const maxHeight = window.innerHeight - currentRect.height - margin;
 
-    // 3. Aplicar movimiento
-    noBtn.style.position = 'fixed';
-    noBtn.style.left = randomX + 'px';
-    noBtn.style.top = randomY + 'px';
+    // 3. ¿Cuánto queremos que se mueva? (Entre -150px y +150px)
+    // Esto hace que el salto sea corto, no teletransportación
+    const jumpRange = 150; 
+    const randomX = (Math.random() - 0.5) * 2 * jumpRange;
+    const randomY = (Math.random() - 0.5) * 2 * jumpRange;
+
+    // 4. Calcular nueva posición
+    let newX = currentX + randomX;
+    let newY = currentY + randomY;
+
+    // 5. LA PARED (Si se pasa, lo devolvemos adentro)
+    // Math.max(margin, ...) -> Asegura que no se salga por la izquierda/arriba
+    // Math.min(max..., ...) -> Asegura que no se salga por la derecha/abajo
     
-    // Un toque extra: cambiar el texto aleatoriamente para confundir
-    const frases = ["No", "Nop", "¿Segura?", "¡Ups!", "¡Aquí no!"];
-    noBtn.innerText = frases[Math.floor(Math.random() * frases.length)];
+    newX = Math.max(margin, Math.min(newX, maxWidth));
+    newY = Math.max(margin, Math.min(newY, maxHeight));
+
+    // 6. Aplicar movimiento
+    noBtn.style.position = 'fixed'; // Necesario para moverse libremente
+    noBtn.style.left = newX + 'px';
+    noBtn.style.top = newY + 'px';
+    
+    // Asegurar que esté encima de todo
+    noBtn.style.zIndex = "9999";
 }
 
-// Eventos para PC y Móvil
+// --- EVENTOS ---
+
+// PC: Hover
 noBtn.addEventListener('mouseover', moveButton);
+
+// MÓVIL: Touchstart (al tocar)
 noBtn.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Evita el click
     moveButton();
 });
+
+// SEGURIDAD: Click
 noBtn.addEventListener('click', (e) => {
     e.preventDefault();
     moveButton();
 });
 
-// --- LÓGICA DEL BOTÓN SÍ ---
+
+// --- RESTO DEL CÓDIGO (Igual que siempre) ---
 yesBtn.addEventListener('click', () => {
     questionScreen.classList.add('hidden');
     successScreen.classList.remove('hidden');
-    
-    // Ocultar botón No
     noBtn.style.display = 'none';
-
     createExplosion();
     loop(); 
 });
 
-// --- CONFETI (Igual que antes) ---
 function createExplosion() {
     for (let i = 0; i < 300; i++) {
         particles.push({
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
-            size: Math.random() * 20 + 10, // Un poco más pequeños para móvil
+            size: Math.random() * 20 + 10,
             speedX: (Math.random() - 0.5) * 15,
             speedY: (Math.random() - 0.5) * 15,
             emoji: emojis[Math.floor(Math.random() * emojis.length)],
@@ -109,3 +119,8 @@ function loop() {
     }
     if (particles.length > 0) requestAnimationFrame(loop);
 }
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
