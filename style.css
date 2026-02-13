@@ -3,10 +3,12 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Quita el brillo azul al tocar en móvil */
 }
 
 body {
-    height: 100vh;
+    height: 100vh; /* Altura completa de la pantalla */
+    height: 100dvh; /* Altura dinámica para móviles (evita problemas con la barra de navegación) */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -29,66 +31,76 @@ body {
     width: 100%;
     display: flex;
     justify-content: center;
+    padding: 0 1rem; /* Un poco de aire a los lados */
 }
 
-/* Tarjeta de cristal */
+/* Tarjeta de cristal flexible */
 .glass-card {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 30px;
-    padding: 3rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 25px;
+    padding: 2rem 1.5rem; /* Padding responsive */
     text-align: center;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-    max-width: 90%;
-    width: 600px; /* Un poco más ancha para que quepa la foto */
+    
+    /* ANCHO RESPONSIVE */
+    width: 90%; 
+    max-width: 500px; /* Nunca será más ancha de 500px en PC */
     transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
+/* Tipografía Adaptable */
 .title {
     font-family: 'Dancing Script', cursive;
-    font-size: 3.5rem;
+    /* El tamaño se ajusta solo: mínimo 2.5rem, ideal 8vw, máximo 4rem */
+    font-size: clamp(2.5rem, 8vw, 4rem); 
     color: #fff;
-    text-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-shadow: 0 2px 5px rgba(0,0,0,0.15);
     margin-bottom: 0.5rem;
+    line-height: 1.1;
 }
 
 .subtitle {
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 4vw, 1.3rem);
     color: #fff;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 2rem;
+    opacity: 0.9;
 }
 
 /* Botones */
 .btn-group {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
+    gap: 15px;
+    flex-wrap: wrap; /* Si no caben, bajan de línea */
 }
 
 button {
-    padding: 15px 40px;
-    font-size: 1.2rem;
+    padding: 12px 30px;
+    font-size: 1.1rem;
     border: none;
     border-radius: 50px;
     cursor: pointer;
     font-weight: 800;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.2s;
+    /* Evita que el usuario haga zoom al tocar rápido */
+    touch-action: manipulation; 
 }
 
 #yesBtn {
     background: #fff;
     color: #ff758c;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     z-index: 20;
+    flex: 1 1 auto; /* Crece para ocupar espacio si hace falta */
 }
 
 #yesBtn:hover {
-    transform: scale(1.1);
-    background: #ffebef;
+    transform: scale(1.05);
+    background: #fff0f3;
 }
 
 #noBtn {
@@ -104,19 +116,22 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px; /* Espacio entre rosas y foto */
-    margin-top: 20px;
+    gap: 10px; 
+    margin-top: 1rem;
+    width: 100%;
 }
 
 .custom-photo {
-    width: 250px; /* Tamaño de la foto */
+    /* La imagen ocupa el 65% del ancho disponible */
+    width: 65%; 
+    max-width: 250px; 
     height: auto;
-    border: 6px solid white; /* El marco blanco */
-    border-radius: 15px; /* Bordes redondeados */
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    /* Animación de aparición */
-    animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    transform: scale(0); /* Empieza invisible */
+    border: 5px solid white;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    
+    animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transform: scale(0);
 }
 
 @keyframes popIn {
@@ -124,10 +139,15 @@ button {
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Las rosas de los lados */
+/* Rosas laterales */
 .side-rose {
-    font-size: 4rem;
+    /* El tamaño de la rosa depende del ancho de la pantalla */
+    font-size: 10vw; 
+    /* Pero ponemos límites para que no sean ni diminutas ni gigantes */
+    font-size: clamp(2.5rem, 10vw, 4.5rem); 
+    
     animation: floatRose 3s ease-in-out infinite;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
 }
 
 .left-rose {
@@ -136,16 +156,15 @@ button {
 }
 
 .right-rose {
-    animation-delay: 1.5s; /* Para que se muevan alternadas */
+    animation-delay: 1.5s;
     transform: rotate(15deg);
 }
 
 @keyframes floatRose {
     0%, 100% { transform: translateY(0) rotate(10deg); }
-    50% { transform: translateY(-15px) rotate(-10deg); }
+    50% { transform: translateY(-10px) rotate(-10deg); }
 }
 
-/* Utilidades */
 .hidden { display: none; }
 
 #confetti-canvas {
